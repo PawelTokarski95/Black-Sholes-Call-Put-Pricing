@@ -120,7 +120,7 @@ double black_scholes_put(double S, double K, double T, double r, double sigma) {
 
 // TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 int main() {
-    ifstream stock("C:/Users/pawel/Desktop/Trading_ML/stocks/1/2/XOM.csv");
+    ifstream stock("C:/Users/.........../XOM.csv");
 
     string stock_line;
     getline(stock, stock_line);
@@ -152,23 +152,31 @@ int main() {
 
 
     vector<double> S_chains = Markov_chains(XOM);
-    double S = XOM.back().close;
-
-    double K = 105.0;
-    double T = 0.1;
+    double K = 110.0;
+    double T = 0.5;
     double r = 0.03;
-    double v = Volatility(XOM);
+    double sigma = Volatility(XOM);
 
-    double call_price = black_scholes_call(S, K, T, r, v);
-    double put_price  = black_scholes_put(S, K, T, r, v);
+    vector<double> call_trajectory;
+    vector<double> put_trajectory;
 
+    for (double S_t : S_chains) {
+        double call_price = black_scholes_call(S_t, K, T, r, sigma);
+        double put_price  = black_scholes_put(S_t, K, T, r, sigma);
+        call_trajectory.push_back(call_price);
+        put_trajectory.push_back(put_price);
+    }
 
-    cout << "Stock_Price: " << S << endl;
-    cout << "BS Call_price: " << call_price << endl;
-    cout << "BS Put_price: " << put_price << endl;
-
-
-
+    ofstream out("Trajectories.csv");
+    out << "Index,Markov_price,Call_Price,Put_Price\n";
+    for (size_t i = 0; i < S_chains.size(); ++i) {
+        out << i << "," << S_chains[i] << "," << call_trajectory[i] << "," << put_trajectory[i] << "\n";
+    }
+    out.close();
 
     return 0;
 }
+
+
+
+
