@@ -1,0 +1,174 @@
+#include <fstream>
+#include <iostream>
+#include <random>
+#include <vector>
+#include <sstream>
+#include <string>
+#include <cmath>
+
+using namespace std;
+
+
+vector<double> Wiener(int period = 100) {
+    random_device rd;
+    mt19937 rng(rd());
+    normal_distribution<double> distribution(0.0, 1.0);
+    vector<double> wiener;
+
+    for (int i = 0; i < period; i++) {
+
+        double x = distribution(rng);
+        wiener.push_back(x);
+
+
+    }
+
+
+    return wiener;
+}
+
+
+struct ticker {
+
+    string date;
+    double open;
+    double high;
+    double low;
+    double close;
+    double volume;
+
+};
+
+double Rate_of_return(const vector<ticker>& XOM) {
+
+    vector<double> ror;
+    double sum_ror = 0.0;
+
+    for (size_t i = 1; i < XOM.size(); ++i) {
+        double r = log(XOM[i].close / XOM[i - 1].close);
+        ror.push_back(r);
+        sum_ror += r;
+    }
+    double avg_ror = sum_ror / ror.size();
+
+    return avg_ror;
+
+}
+
+double Volatility(const vector<ticker>& XOM) {
+    vector<double> ror;
+    double avg_ror = Rate_of_return(XOM);
+
+    for (size_t i = 1; i < XOM.size(); ++i) {
+        if (XOM[i - 1].close <= 0 || XOM[i].close <= 0) continue;
+        double r = log(XOM[i].close / XOM[i - 1].close);
+        if (!isfinite(r)) continue;
+        ror.push_back(r);
+    }
+
+    if (ror.size() < 2) return 0.0;
+
+    double sum_squared_diff = 0.0;
+    for (double r : ror) {
+        sum_squared_diff += pow(r - avg_ror, 2);
+    }
+
+    return sqrt(sum_squared_diff / (ror.size() - 1));
+}
+
+
+vector<double> Markov_chains(const vector<ticker>& XOM) {
+    vector<double> noise = Wiener(100);
+    vector<double> S;
+
+    double S0 = XOM.back().close;
+    double mu = Rate_of_return(XOM);
+    double sigma = Volatility(XOM);
+    double dt = 1.0 / 252.0;
+
+    S.push_back(S0);
+    for (size_t i = 1; i < noise.size(); ++i) {
+        double prev = S.back();
+        double next = prev * exp((mu - 0.5 * sigma * sigma) * dt + sigma * sqrt(dt) * noise[i]);
+        S.push_back(next);
+    }
+
+    return S;
+}
+
+double cdf(double x) {
+    return 0.5 * erfc(-x / sqrt(2));
+}
+
+double black_scholes_call(double S, double K, double T, double r, double sigma) {
+
+    double d1 = (log(S / K) + (r + 0.5 * sigma * sigma) * T) / (sigma * sqrt(T));
+    double d2 = d1 - sigma * sqrt(T);
+    double Price = S*cdf(d1) - K*exp(-r*T)*cdf(d2);
+    return Price;
+}
+
+double black_scholes_put(double S, double K, double T, double r, double sigma) {
+
+    double d1 = (log(S / K) + (r + 0.5 * sigma * sigma) * T) / (sigma * sqrt(T));
+    double d2 = d1 - sigma * sqrt(T);
+    double Price = K * exp(-r * T) * cdf(-d2) - S * cdf(-d1);
+    return Price;
+}
+
+
+
+// TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+int main() {
+    ifstream stock("C:/Users/pawel/Desktop/Trading_ML/stocks/1/2/XOM.csv");
+
+    string stock_line;
+    getline(stock, stock_line);
+    vector<double> stock_price;
+
+
+    vector<ticker> XOM;
+
+
+
+    while (getline(stock, stock_line)) {
+        stringstream ss(stock_line);
+        string date;
+        string t_open, t_high, t_low, t_close, t_volume;
+        getline(ss, date, ';');
+        getline(ss, t_open, ';');
+        getline(ss, t_high, ';');
+        getline(ss, t_low, ';');
+        getline(ss, t_close, ';');
+        getline(ss, t_volume, ';');
+
+        ticker o{date, stod(t_open), stod(t_high), stod(t_low), stod(t_close), stod(t_volume)};
+        XOM.push_back(o);
+
+
+
+
+    }
+
+
+    vector<double> S_chains = Markov_chains(XOM);
+    double S = XOM.back().close;
+
+    double K = 105.0;
+    double T = 0.1;
+    double r = 0.03;
+    double v = Volatility(XOM);
+
+    double call_price = black_scholes_call(S, K, T, r, v);
+    double put_price  = black_scholes_put(S, K, T, r, v);
+
+
+    cout << "Stock_Price: " << S << endl;
+    cout << "BS Call_price: " << call_price << endl;
+    cout << "BS Put_price: " << put_price << endl;
+
+
+
+
+    return 0;
+}
