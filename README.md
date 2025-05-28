@@ -27,3 +27,14 @@ Then we have the Wiener Process.
 This is basically a mathematical representation of random noise that flows over time. It assumes that in very small time intervals, the price movement can go in any direction – up or down – with some randomness, but it follows a normal distribution. Over longer periods, this randomness accumulates, and the resulting movement is called Brownian motion.
 
 We use it because it captures the inherent uncertainty and chaos of financial markets. In my project, it was used to simulate possible future prices of a stock, based on current market parameters like average return and volatility.
+
+I created a Wiener process in strict relation with Markov chains. This means the future stock price depends only on the current price, not the full past history. Using this idea, I was able to generate 100 different possible future price paths for the stock (XOM).
+
+Then, based on these price paths, I calculated call and put option prices for each scenario. Instead of just one fixed option price, I got a whole range of possible prices, which better shows the market uncertainty and risk.
+
+This way, you can see how option prices might change under different future market conditions, rather than relying on just one number. Keep in mind, that the stock prices and option prices for the 100 observation period (100 days) is rather sensitive towards errors.
+
+Here are the results (it can be seen that there is an inverse correlation between the call and put options which is typicall in terms of financial markets domain):
+
+![Trajectories csv - Excel 28 05 2025 15_52_16](https://github.com/user-attachments/assets/6e859a40-41b0-4d6b-a440-633b22b1b9cd)
+![Trajectories csv - Excel 28 05 2025 15_52_25](https://github.com/user-attachments/assets/5009be27-abfd-4a6a-a708-cb6c67824c0e)
