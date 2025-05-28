@@ -1,4 +1,4 @@
-# Black-Sholes-Call-Put-Pricing
+# Black-Scholes-Call-Put-Pricing
 
 - **Language**: C++
 
