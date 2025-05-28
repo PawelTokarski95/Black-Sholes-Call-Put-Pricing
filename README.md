@@ -21,7 +21,7 @@ We also have d₁ and d₂. These serve as more precise calculations implying th
 
 Then we have the Wiener Process.
 
-![Wiener_process_with_sigma svg](https://github.com/user-attachments/assets/379cb581-c9f0-4395-89db-68b5e2e2ad52)
+![Wiener_process_with_sigma svg](https://github.com/user-attachments/assets/d8f4b5f0-515b-413c-a804-e701da211c7e)
 
 
 This is basically a mathematical representation of random noise that flows over time. It assumes that in very small time intervals, the price movement can go in any direction – up or down – with some randomness, but it follows a normal distribution. Over longer periods, this randomness accumulates, and the resulting movement is called Brownian motion.
